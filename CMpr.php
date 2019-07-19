@@ -2,56 +2,85 @@
 
 class CMpr
 {
+    /**
+     * Left margin for child items
+     *
+     * @var integer
+     */
     private static $margin = 20;
 
+    /**
+     * Check object for child items
+     *
+     * @var boolean
+     */
+    private static $isObject = false;
+
+    /**
+     * Basic function
+     *
+     * @return void
+     */
     public static function mpr() {  
         $nNumargs = func_num_args();
-        $arArgs = func_get_args();
+        $arArgs   = func_get_args();
      
-        $sTitle = '';
-        $bDie = false;
-        $bJS = false;
+        self::$isObject = $sTitle = $bDie = $bJS = false;
      
-        if ($nNumargs < 1) {
+        if ($nNumargs == 0) {
             $arData = 'NO DATA!!!';
-        } elseif ($nNumargs == 1) {
-            $arData = self::__clearKey($arArgs[0]);
         } else {
             $arData = self::__clearKey($arArgs[0]);
             unset($arArgs[0]);
-     
+
+            if ($nNumargs == 1) {
+                goto ifend;
+            }
+    
             $nDie = array_search('die', $arArgs, true);
-            if ((boolean)$nDie > 0) {
+            if ((integer)$nDie > 0) {
                 $bDie = (boolean)$arArgs[$nDie];
                 unset($arArgs[$nDie]);
             }
-     
+    
             $nJS = array_search('js', $arArgs, true);
-            if ((boolean)$nJS > 0) {
+            if ((integer)$nJS > 0) {
                 $bJS = (boolean)$arArgs[$nJS];
                 unset($arArgs[$nJS]);
             }
-     
+    
             $nTitle = array_search(true, $arArgs);
-            $sTitle = (string)$arArgs[$nTitle];
+            if ((integer)$nTitle > 0) {
+                $sTitle = (string)$arArgs[$nTitle];
+                unset($arArgs[$nTitle]);
+            }
         }
+
+        ifend:
      
         $arDebug = debug_backtrace();
         $nLevel = (version_compare(PHP_VERSION, '7.0.0', '>=')) ? 1 : 2;
         $arDebug = $arDebug[$nLevel];
+        $sDebug = str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug['file']) . ' [' . $arDebug['line'] . ']';
      
         if($bJS) {
             ?><script>console.log("<?= ($sTitle ? $sTitle . ' - ' : '') . str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug['file']) . ' [' . $arDebug['line'] . ']' ?>", <?= json_encode($arData) ?>);</script><?
             return;
         }
      
-        self::__print($arData, $sTitle, $arDebug);
+        self::__print($arData, $sTitle, $sDebug);
      
         if ($bDie) {
             die();
         }
     }
 
+    /**
+     * Delete cache items into array
+     *
+     * @param array $arData
+     * @return array $arResult
+     */
     private static function __clearKey($arData) {
         $arResult = $arData;
      
@@ -66,12 +95,20 @@ class CMpr
         return $arResult;
     }
 
-    private static function __print($arData, $sTitle, $arDebug) {
-        echo '<div class="mpr" style="border:5px solid #DDD;background-color:#DDD;margin:15px 0;min-height:34px;clead:both;">';
+    /**
+     * Print all result
+     *
+     * @param array $arData
+     * @param string $sTitle
+     * @param string $sDebug
+     * @return void
+     */
+    private static function __print($arData, $sTitle, $sDebug) {
+        echo '<div class="mpr" style="border:5px solid #DDD;background-color:#DDD;margin:15px auto;min-height:34px;clear:both;max-width:1000px;position:sticky;z-index:9999;">';
         if (strlen($sTitle) > 0) {
             echo '<span style="padding:5px 10px 10px;float:right;opacity:0.5;font-family:monospace;word-wrap:break-word;max-width:100%;">' . $sTitle . '</span>';
         }
-        echo '<span style="padding:5px 10px 10px;float:left;opacity:0.5;font-family:monospace;word-wrap:break-word;max-width:100%;">' . str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug['file']) . ' [' . $arDebug['line'] . ']</span>';
+        echo '<span style="padding:5px 10px 10px;float:left;opacity:0.5;font-family:monospace;word-wrap:break-word;max-width:100%;">' . $sDebug . '</span>';
             echo '<pre style="background:#282c34;color:#abb2bf;border:0;border-radius:0;margin:29px 0 0;font-family:monospace;font-size:13px;font-weight:400;max-height:500px;overflow:auto;clear:both;padding:5px;">';
                 
                 self::__printRow($arData);
@@ -80,25 +117,38 @@ class CMpr
         echo '</div>';
     }
 
-    private static function __printRow($arData, $key = '', $isObject = false) {
+    /**
+     * Print one row to result
+     *
+     * @param array $arData
+     * @param string $key
+     * @return void
+     */
+    private static function __printRow($arData, $key = '') {
         if (is_object($arData) || is_array($arData)) {
-            self::__printArrayRow($arData, $key, $isObject);
+            self::__printArrayRow($arData, $key);
         } else {
-            self::__printSimpleRow($arData, $key, $isObject);
+            self::__printSimpleRow($arData, $key);
         }
     }
     
+    /**
+     * Recursive print all rows
+     *
+     * @param array $arData
+     * @return void
+     */
     private static function __printRowRec($arData) {
         if (!is_object($arData) && !is_array($arData)) {
             return;
         }
         $arData = self::__clearKey($arData);
 
-        $isObject = is_object($arData);
+        self::$isObject = is_object($arData);
 
         echo '(';
         foreach ($arData as $key => $val) {
-            self::__printRow($val, $key, $isObject);
+            self::__printRow($val, $key);
         }
         if (count($arData) == 0) {
             echo '<br>';
@@ -106,37 +156,59 @@ class CMpr
         echo ')';
     }
 
-    private static function __printArrayRow($arData, $key, $isObject) {
-        $margin = '';
-        if ($key) {
-            if ($isObject) {
+    /**
+     * Print array and object
+     *
+     * @param array $arData
+     * @param string $key
+     * @return void
+     */
+    private static function __printArrayRow($arData, $key) {
+        $sMargin = '';
+        if ($key !== '') {
+            if (self::$isObject) {
                 $key = $key . ' : ';
             } else {
                 $key = '[' . $key . '] => ';
             }
-            $margin = ' style="margin-left:' . self::$margin . 'px"';
+            $sMargin = ' style="margin-left:' . self::$margin . 'px"';
             echo '<div>';
         }
-        echo '<details open' . $margin . '>';
-            echo '<summary style="outline:none!important;cursor:pointer">';
-                echo (is_object($arData)) ? $key . '<span style="color:#c678dd;">' . get_class($arData) . ' Object {' . count((array)$arData) . '}</span>' : $key . '<span style="color:#e06c75">Array [' . count($arData) . ']</span>';
-            echo '</summary>';
 
-            self::__printRowRec($arData);
-            
-        echo '</details>';
-        if ($key) {
+        if (count((array)$arData) > 0) {
+            echo '<details open' . $sMargin . '>';
+            echo '<summary style="outline:none!important;cursor:pointer">';
+        } else {
+            echo '<div style="line-height:1.5;margin-left:' . self::$margin . 'px">';
+        }
+
+        echo (is_object($arData)) ? $key . '<span style="color:#c678dd;">' . get_class($arData) . ' Object {' . count((array)$arData) . '}</span>' : $key . '<span style="color:#e06c75">Array [' . count($arData) . ']</span>';
+        
+        if (count((array)$arData) > 0) {
+            echo '</summary>';
+            self::__printRowRec($arData);   
+            echo '</details>';
+        } else {
+            echo "</div>";
+        }
+        if ($key !== '') {
             echo '</div>';
         }
     }
 
-    private static function __printSimpleRow($arData, $key, $isObject) {
+    /**
+     * Print simple item
+     *
+     * @param array $arData
+     * @param string $key
+     * @return void
+     */
+    private static function __printSimpleRow($arData, $key) {
         $sType = gettype($arData);
         if($arData === 'NO DATA!!!') {
             $sType = 'ERROR';
         }
-        $sChars = '';
-        $sColor = '';
+        $sChars = $sColor = '';
         switch($sType) {
             case 'string':
                 $sColor = '#61afef';
@@ -163,15 +235,15 @@ class CMpr
                 break;
         }
 
-        if ($key) {
-            if ($isObject) {
-                echo '<div style="margin-left:' . self::$margin . 'px"><span>' . $key . '</span> : ';
+        if ($key !== '') {
+            if (self::$isObject) {
+                echo '<div style="line-height:1.5;margin-left:' . self::$margin . 'px"><span>' . $key . '</span> : ';
             } else {
-                echo '<div style="margin-left:' . self::$margin . 'px"><span>[' . $key . ']</span> => ';
+                echo '<div style="line-height:1.5;margin-left:' . self::$margin . 'px"><span>[' . $key . ']</span> => ';
             }
         }
         echo '<span style="display:inline-table;color:' . $sColor . '">' . $arData . '</span> <span style="opacity:0.5">(' . $sType . $sChars . ')</span>';
-        if ($key) {
+        if ($key !== '') {
             echo '</div>';
         }
 
