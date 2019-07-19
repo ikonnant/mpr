@@ -104,7 +104,7 @@ class CMpr
      * @return void
      */
     private static function __print($arData, $sTitle, $sDebug) {
-        echo '<div class="mpr" style="border:5px solid #DDD;background-color:#DDD;margin:15px auto;min-height:34px;clear:both;max-width:1000px;position:sticky;z-index:9999;">';
+        echo '<div class="mpr" style="line-height:1.5;border:5px solid #DDD;background-color:#DDD;margin:15px auto;min-height:34px;clear:both;max-width:1000px;position:sticky;z-index:9999;">';
         if (strlen($sTitle) > 0) {
             echo '<span style="padding:5px 10px 10px;float:right;opacity:0.5;font-family:monospace;word-wrap:break-word;max-width:100%;">' . $sTitle . '</span>';
         }
@@ -179,7 +179,7 @@ class CMpr
             echo '<details open' . $sMargin . '>';
             echo '<summary style="outline:none!important;cursor:pointer">';
         } else {
-            echo '<div style="line-height:1.5;margin-left:' . self::$margin . 'px">';
+            echo '<div style="margin-left:' . self::$margin . 'px">';
         }
 
         echo (is_object($arData)) ? $key . '<span style="color:#c678dd;">' . get_class($arData) . ' Object {' . count((array)$arData) . '}</span>' : $key . '<span style="color:#e06c75">Array [' . count($arData) . ']</span>';
@@ -237,9 +237,9 @@ class CMpr
 
         if ($key !== '') {
             if (self::$isObject) {
-                echo '<div style="line-height:1.5;margin-left:' . self::$margin . 'px"><span>' . $key . '</span> : ';
+                echo '<div style="margin-left:' . self::$margin . 'px"><span>' . $key . '</span> : ';
             } else {
-                echo '<div style="line-height:1.5;margin-left:' . self::$margin . 'px"><span>[' . $key . ']</span> => ';
+                echo '<div style="margin-left:' . self::$margin . 'px"><span>[' . $key . ']</span> => ';
             }
         }
         echo '<span style="display:inline-table;color:' . $sColor . '">' . $arData . '</span> <span style="opacity:0.5">(' . $sType . $sChars . ')</span>';
