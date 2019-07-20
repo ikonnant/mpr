@@ -37,8 +37,8 @@ class CMpr
                 goto ifend;
             }
     
-            $bDie = __setAttribute('die', $arArgs);
-            $bJS  = __setAttribute('js', $arArgs);
+            $bDie = self::__setAttribute('die', $arArgs);
+            $bJS  = self::__setAttribute('js', $arArgs);
             
             $arArgs = array_values($arArgs);
             $sTitle = $arArgs[0];
