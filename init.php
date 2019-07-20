@@ -1,5 +1,10 @@
 <?php
+//class autoload php
+spl_autoload_register(function ($className) {
+    include $className . '.php';
+});
 
+//class autoload Bitrix
 CModule::AddAutoloadClasses(
 	'',
 	array(
@@ -7,7 +12,7 @@ CModule::AddAutoloadClasses(
     )
 );
 
+//function short class call
 function mpr() {
-    $arArgs = func_get_args();
-    call_user_func_array('CMpr::mpr', $arArgs);
+    call_user_func_array('CMpr::mpr', func_get_args());
 }
