@@ -2,18 +2,11 @@
 class CMpr
 {
     /**
-     * Not clear cache parameters in array
+     * Arguments in object
      *
-     * @var boolean
+     * @var array
      */
-    private $noClear = false;
-
-    /**
-     * Test
-     *
-     * @var boolean
-     */
-    private $isTest = false;
+    private $arArgs;
 
     /**
      * Left margin for child items
@@ -21,20 +14,6 @@ class CMpr
      * @var integer
      */
     private $margin = 20;
-
-    /**
-     * Check object for child items
-     *
-     * @var boolean
-     */
-    private $isObject = false;
-
-    /**
-     * Arguments in object
-     *
-     * @var array
-     */
-    private $arArgs;
 
     /**
      * Title mpr print
@@ -58,14 +37,18 @@ class CMpr
     private $bJS = false;
 
     /**
-     * Set arguments
+     * Not clear cache parameters in array
      *
-     * @param array $arArgs
-     * @return void
+     * @var boolean
      */
-    public function setArgs($arArgs) {
-        $this->arArgs = $arArgs;
-    }
+    private $noClear = false;
+
+    /**
+     * Test
+     *
+     * @var boolean
+     */
+    private $isTest = false;
 
     /**
      * Set noClear to true
@@ -88,11 +71,23 @@ class CMpr
     /**
      * Set arguments
      *
+     * @param array $arArgs
+     * @return void
+     */
+    public function setArgs($arArgs) {
+        $this->arArgs = $arArgs;
+    }
+
+    /**
+     * Set margin
+     *
      * @param integer $nMargin
      * @return void
      */
     public function setMargin($nMargin) {
-        $this->margin = $nMargin;
+        if ((integer)$nMargin > 0) {
+            $this->margin = $nMargin;
+        }
     }
 
     /**
@@ -106,37 +101,39 @@ class CMpr
             return;
         }
 
-        if (count($this->arArgs) == 0) {
-            $arData = 'NO DATA!!!';
-        } else {
+        $arData = 'NO DATA!!!';
+
+        if (count($this->arArgs) > 0) {
             $arData = $this->clearKey($this->arArgs[0]);
-            unset($this->arArgs[0]);
 
-            if (count($this->arArgs) == 0) { //if before unset, arguments not left
-                goto ifend;
-            }
+            if (count($this->arArgs) > 1) {
+                unset($this->arArgs[0]);
+                $this->bDie = $this->setAttribute('die');
+                $this->bJS  = $this->setAttribute('js');
 
-            $this->bDie = $this->setAttribute('die');
-            $this->bJS  = $this->setAttribute('js');
-
-            $this->arArgs = array_values($this->arArgs);
-            if (count($this->arArgs) > 0) {
-                $this->sTitle = $this->arArgs[0];
+                $this->arArgs = array_values($this->arArgs);
+                if (count($this->arArgs) > 0) { //if before unset into setAttribute(), arguments is not left
+                    $this->sTitle = $this->arArgs[0];
+                }
             }
         }
-        ifend:
 
-        $arDebug = debug_backtrace()[1];
+        //$arDebug = debug_backtrace()[1] ?? debug_backtrace()[0];
+        if (isset(debug_backtrace()[1])) {
+            $arDebug = debug_backtrace()[1];
+        } else {
+            $arDebug = debug_backtrace()[0];
+        }
+
         $sDebug = str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug['file']) . ' [' . $arDebug['line'] . ']';
 
         $this->printAll($arData, $sDebug);
     }
 
     /**
-     * Set value to attribute in array
+     * Set value to attribute in array and unset it into $arArgs
      *
      * @param string $sArg
-     * @param array $arArgs
      * @return boolean $bArg
      */
     private function setAttribute($sArg) {
@@ -149,6 +146,7 @@ class CMpr
 
         return $bArg;
     }
+
     /**
      * Delete cache items into array
      *
@@ -168,11 +166,11 @@ class CMpr
         }
         return $arResult;
     }
+
     /**
      * Print all result
      *
      * @param array $arData
-     * @param string $sTitle
      * @param string $sDebug
      * @return void
      */
@@ -203,6 +201,7 @@ class CMpr
             die('<span style="margin:-20px auto 20px;clear:both;max-width:1000px;position:sticky;z-index:9999;display:block;border:5px solid #DDD;border-top:0px;background-color:#282c34;line-height:3;text-align:center;color:#e06c75;"><hr style="position:absolute;left:4%;right:55%;margin:0;top:50%;border-color:#e06c75;">DIE<hr style="position:absolute;right:4%;left:55%;margin:0;top:50%;border-color:#e06c75;"></span>');
         }
     }
+
     /**
      * Print one row to result
      *
@@ -210,11 +209,11 @@ class CMpr
      * @param string $key
      * @return void
      */
-    private function printRow($arData, $key = '') {
+    private function printRow($arData, $key = '', $isObject = false) {
         if (is_object($arData) || is_array($arData)) {
-            $this->printArrayRow($arData, $key);
+            $this->printArrayRow($arData, $key, $isObject);
         } else {
-            $this->printSimpleRow($arData, $key);
+            $this->printSimpleRow($arData, $key, $isObject);
         }
     }
 
@@ -229,16 +228,27 @@ class CMpr
             return;
         }
         $arData = $this->clearKey($arData);
-        $this->isObject = is_object($arData);
+
+        $isObject = is_object($arData);
+        if ($isObject) { //fix vars value for object to array
+            $arObject = $arData;
+            $arData = (array)$arData;
+            foreach (array_keys(get_object_vars($arObject)) as $obKey) {
+                $arData[$obKey] = $arObject->$obKey;
+            }
+        }
+
         echo '(';
+        //array_unshift($arData, get_class_methods($arObject));
         foreach ($arData as $key => $val) {
-            $this->printRow($val, $key);
+            $this->printRow($val, $key, $isObject);
         }
         if (count($arData) == 0) {
             echo '<br>';
         }
         echo ')';
     }
+
     /**
      * Print array and object
      *
@@ -246,10 +256,10 @@ class CMpr
      * @param string $key
      * @return void
      */
-    private function printArrayRow($arData, $key) {
+    private function printArrayRow($arData, $key, $isObject) {
         $sMargin = '';
         if ($key !== '') {
-            if ($this->isObject) {
+            if ($isObject) {
                 $key = $key . ' : ';
             } else {
                 $key = '[' . $key . '] => ';
@@ -276,6 +286,7 @@ class CMpr
             echo '</div>';
         }
     }
+
     /**
      * Print simple item
      *
@@ -283,7 +294,7 @@ class CMpr
      * @param string $key
      * @return void
      */
-    private function printSimpleRow($arData, $key) {
+    private function printSimpleRow($arData, $key, $isObject) {
         $sType = gettype($arData);
         if($arData === 'NO DATA!!!') {
             $sType = 'ERROR';
@@ -315,7 +326,7 @@ class CMpr
                 break;
         }
         if ($key !== '') {
-            if ($this->isObject) {
+            if ($isObject) {
                 echo '<div style="margin-left:' . $this->margin . 'px"><span>' . $key . '</span> : ';
             } else {
                 echo '<div style="margin-left:' . $this->margin . 'px"><span>[' . $key . ']</span> => ';
