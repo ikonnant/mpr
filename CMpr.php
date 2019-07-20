@@ -37,23 +37,11 @@ class CMpr
                 goto ifend;
             }
     
-            $nDie = array_search('die', $arArgs, true);
-            if ((integer)$nDie > 0) {
-                $bDie = (boolean)$arArgs[$nDie];
-                unset($arArgs[$nDie]);
-            }
-    
-            $nJS = array_search('js', $arArgs, true);
-            if ((integer)$nJS > 0) {
-                $bJS = (boolean)$arArgs[$nJS];
-                unset($arArgs[$nJS]);
-            }
-    
-            $nTitle = array_search(true, $arArgs);
-            if ((integer)$nTitle > 0) {
-                $sTitle = (string)$arArgs[$nTitle];
-                unset($arArgs[$nTitle]);
-            }
+            $nDie = __setAttribute('die', $arArgs);
+            $nJS = __setAttribute('js', $arArgs);
+            
+            $arArgs = array_values($arArgs);
+            $sTitle = $arArgs[0];
         }
 
         ifend:
@@ -73,6 +61,24 @@ class CMpr
         if ($bDie) {
             die();
         }
+    }
+    
+    /**
+     * Set value to attribute in array
+     *
+     * @param string $sArg
+     * @param array $arArgs
+     * @return boolean $bArg
+     */
+    private static function __setAttribute($sArg, &$arArgs) {
+        $bArg = false;
+        $nArg = array_search($sArg, $arArgs, true);
+        if ((integer)$nArg > 0) {
+            $bArg = (boolean)$arArgs[$nArg];
+            unset($arArgs[$nArg]);
+        }
+        
+        return $bArg;
     }
 
     /**
