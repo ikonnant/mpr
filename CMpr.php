@@ -37,8 +37,8 @@ class CMpr
                 goto ifend;
             }
     
-            $nDie = __setAttribute('die', $arArgs);
-            $nJS = __setAttribute('js', $arArgs);
+            $bDie = __setAttribute('die', $arArgs);
+            $bJS  = __setAttribute('js', $arArgs);
             
             $arArgs = array_values($arArgs);
             $sTitle = $arArgs[0];
@@ -46,9 +46,8 @@ class CMpr
 
         ifend:
      
-        $arDebug = debug_backtrace();
         $nLevel = (version_compare(PHP_VERSION, '7.0.0', '>=')) ? 1 : 2;
-        $arDebug = $arDebug[$nLevel];
+        $arDebug = debug_backtrace()[$nLevel];
         $sDebug = str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug['file']) . ' [' . $arDebug['line'] . ']';
      
         if($bJS) {
