@@ -4,7 +4,6 @@ spl_autoload_register(function ($className) {
     include $className . '.php';
 });
 
-//class autoload Bitrix
 CModule::AddAutoloadClasses(
     '',
     ['CMpr' => '/local/php_interface/CMpr.php']
@@ -12,8 +11,10 @@ CModule::AddAutoloadClasses(
 
 //function short class call
 function mpr() {
-    call_user_func_array(
-	'CMpr::mpr',
-	func_get_args()
-    );
+    $mpr = new CMpr;
+    $mpr->setArgs(func_get_args());
+    //$mpr->isTest();
+    //$mpr->noClear();
+    //$mpr->setMargin(10);
+    $mpr->init();
 }
