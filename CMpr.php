@@ -13,7 +13,7 @@ class CMpr
      *
      * @var integer
      */
-    private $margin = 20;
+    private $nMargin = 20;
 
     /**
      * Title mpr print
@@ -58,6 +58,17 @@ class CMpr
     private $isTest = false;
 
     /**
+     * Echo error if PHP version < 7
+     *
+     * @return void
+     */
+    public function __construct() {
+        if (!defined('PHP_MAJOR_VERSION') || PHP_MAJOR_VERSION < 7) {
+            $this->arArgs = ['CMpr requires php version 7.0+, the class is currently not active. Сurrent php version ' . phpversion()];
+        }
+    }
+
+    /**
      * Set noClear to true
      *
      * @return void
@@ -76,7 +87,7 @@ class CMpr
     }
 
     /**
-     * Set test
+     * Set isTest to true
      *
      * @return void
      */
@@ -91,7 +102,9 @@ class CMpr
      * @return void
      */
     public function setArgs($arArgs) {
-        $this->arArgs = $arArgs;
+        if (!$this->arArgs) {
+            $this->arArgs = $arArgs;
+        }
     }
 
     /**
@@ -102,7 +115,7 @@ class CMpr
      */
     public function setMargin($nMargin) {
         if ((integer)$nMargin > 0) {
-            $this->margin = $nMargin;
+            $this->nMargin = $nMargin;
         }
     }
 
@@ -135,7 +148,7 @@ class CMpr
         }
 
         $arDebug = debug_backtrace()[1] ?? debug_backtrace()[0];
-        $sDebug = str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug['file']) . ' [' . $arDebug['line'] . ']';
+        $sDebug  = str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug['file']) . ' [' . $arDebug['line'] . ']';
 
         $this->printAll($arData, $sDebug);
     }
@@ -217,6 +230,7 @@ class CMpr
      *
      * @param array $arData
      * @param string $key
+     * @param boolean $isObject
      * @return void
      */
     private function printRow($arData, $key = '', $isObject = false) {
@@ -248,7 +262,7 @@ class CMpr
             }
 
             if (!$this->noClassParameters) {
-                $this->printClassMethods($obObject);
+                $this->printClassParameters($obObject);
             }
         }
 
@@ -263,17 +277,17 @@ class CMpr
     }
 
     /**
-     * Print all public methods of class
+     * Print all class parameters
      *
      * @param object $obObject
      * @return void
      */
-    private function printClassMethods($obObject) {
+    private function printClassParameters($obObject) {
         $obReflection = new ReflectionClass($obObject);
         $arMethods = $obReflection->getMethods();
         $arProperties = $obReflection->getProperties();
 
-        echo '<details style="position:relative;margin-left:' . $this->margin . 'px">';
+        echo '<details style="position:relative;margin-left:' . $this->nMargin . 'px">';
             echo '<summary style="outline:none!important;cursor:pointer;opacity:0.5;display:inline-block;position: absolute;">parameters {' . count($arMethods) . '}</summary>';
             echo '<br>{';
             foreach ($obReflection->getProperties() as $obProperty) {
@@ -290,7 +304,7 @@ class CMpr
                 $sValue    = $obReflection->getDefaultProperties()[$sName];
                 $arType    = $this->getColorByType($sValue);
 
-                echo '<div style="margin-left:' . $this->margin . 'px;margin-bottom:20px;">';
+                echo '<div style="margin-left:' . $this->nMargin . 'px;margin-bottom:20px;">';
                     echo '<div style="opacity:0.5;">' . $sComment . '</div>';
                     echo '<div>Var [ <span style="color:#c678dd;">' . $sType . '</span> var <span style="color:#61afef;">' . $sName . '</span> = <span style="color:' . $arType['COLOR'] . '">' . $sValue . '</span> <span style="opacity:0.5">(' . $arType['TYPE'] . $arType['CHARS'] . ')</span> ]</div>';
                 echo '</div>';
@@ -309,15 +323,15 @@ class CMpr
                 $sName        = $arName[1];
                 $arParameters = $arParameters[1];
 
-                echo '<div style="margin-left:' . $this->margin . 'px;margin-bottom:20px;">';
+                echo '<div style="margin-left:' . $this->nMargin . 'px;margin-bottom:20px;">';
                     echo '<div style="opacity:0.5;">' . $sComment . '</div>';
                     echo '<div>Method [ <span style="color:#c678dd;">' . $sType . '</span> method <span style="color:#61afef;">' . $sName . '</span> ] {</div>';
-                    echo '<div style="margin-left:' . $this->margin . 'px;">@@ ' . $sDebug . '</div>';
+                    echo '<div style="margin-left:' . $this->nMargin . 'px;">@@ ' . $sDebug . '</div>';
 
                     if (count($arParameters)) {
-                        echo '<br><div style="margin-left:' . $this->margin . 'px;">- Parameters [' . count($arParameters) . '] {';
+                        echo '<br><div style="margin-left:' . $this->nMargin . 'px;">- Parameters [' . count($arParameters) . '] {';
                             foreach ($arParameters as $num => $sParamater) {
-                                echo '<div style="margin-left:' . $this->margin . 'px;">Parameter #' . $num . ' [ ' . trim($sParamater) . ' ]</div>';
+                                echo '<div style="margin-left:' . $this->nMargin . 'px;">Parameter #' . $num . ' [ ' . trim($sParamater) . ' ]</div>';
                             }
                         echo '}</div>';
                     }
@@ -334,6 +348,7 @@ class CMpr
      *
      * @param array $arData
      * @param string $key
+     * @param boolean $isObject
      * @return void
      */
     private function printArrayRow($arData, $key, $isObject) {
@@ -344,14 +359,14 @@ class CMpr
             } else {
                 $key = '[' . $key . '] => ';
             }
-            $sMargin = ' style="margin-left:' . $this->margin . 'px;"';
+            $sMargin = ' style="margin-left:' . $this->nMargin . 'px;"';
             echo '<div>';
         }
         if (count((array)$arData) > 0) {
             echo '<details open' . $sMargin . '>';
             echo '<summary style="outline:none!important;cursor:pointer;display:inline-block;">';
         } else {
-            echo '<div style="margin-left:' . $this->margin . 'px">';
+            echo '<div style="margin-left:' . $this->nMargin . 'px">';
         }
         echo (is_object($arData)) ? $key . '<span style="color:#c678dd;">' . get_class($arData) . ' Object {' . count((array)$arData) . '}</span>' : $key . '<span style="color:#e06c75">Array [' . count($arData) . ']</span>';
 
@@ -372,6 +387,7 @@ class CMpr
      *
      * @param array $arData
      * @param string $key
+     * @param boolean $isObject
      * @return void
      */
     private function printSimpleRow($arData, $key, $isObject) {
@@ -379,9 +395,9 @@ class CMpr
 
         if ($key !== '') {
             if ($isObject) {
-                echo '<div style="margin-left:' . $this->margin . 'px"><span>' . $key . '</span> : ';
+                echo '<div style="margin-left:' . $this->nMargin . 'px"><span>' . $key . '</span> : ';
             } else {
-                echo '<div style="margin-left:' . $this->margin . 'px"><span>[' . $key . ']</span> => ';
+                echo '<div style="margin-left:' . $this->nMargin . 'px"><span>[' . $key . ']</span> => ';
             }
         }
         echo '<span style="display:inline-table;color:' . $arType['COLOR'] . '">' . $arData . '</span> <span style="opacity:0.5">(' . $arType['TYPE'] . $arType['CHARS'] . ')</span>';
@@ -394,8 +410,7 @@ class CMpr
      * Get color by type value
      *
      * @param array $arData
-     * @param string $key
-     * @return void
+     * @return array $arResult
      */
     private function getColorByType(&$arData) {
         $sType = gettype($arData);
@@ -432,12 +447,12 @@ class CMpr
                 break;
         }
 
-        $return = [
+        $arResult = [
             'COLOR' => $sColor,
             'CHARS' => $sChars,
             'TYPE'  => $sType
         ];
 
-        return $return;
+        return $arResult;
     }
 }
