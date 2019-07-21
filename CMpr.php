@@ -58,17 +58,6 @@ class CMpr
     private $isTest = false;
 
     /**
-     * Echo error if PHP version < 7
-     *
-     * @return void
-     */
-    public function __construct() {
-        if (!defined('PHP_MAJOR_VERSION') || PHP_MAJOR_VERSION < 7) {
-            $this->arArgs = ['CMpr requires php version 7.0+, the class is currently not active. Сurrent php version ' . phpversion()];
-        }
-    }
-
-    /**
      * Set noClear to true
      *
      * @return void
@@ -102,9 +91,7 @@ class CMpr
      * @return void
      */
     public function setArgs($arArgs) {
-        if (!$this->arArgs) {
-            $this->arArgs = $arArgs;
-        }
+        $this->arArgs = $arArgs;
     }
 
     /**
@@ -180,7 +167,7 @@ class CMpr
         $arResult = $arData;
 
         if (is_array($arData) && !$this->noClear) {
-            $arResult = array();
+            $arResult = [];
             foreach ($arData as $key => $val) {
                 if (is_integer($key) || is_string($key) && $key[0] != '~') {
                     $arResult[$key] = $this->clearKey($val);
