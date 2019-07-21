@@ -44,6 +44,13 @@ class CMpr
     private $noClear = false;
 
     /**
+     * Not print class parameters in object listing
+     *
+     * @var boolean
+     */
+    private $noClassParameters = false;
+
+    /**
      * Test
      *
      * @var boolean
@@ -57,6 +64,15 @@ class CMpr
      */
     public function noClear() {
         $this->noClear = true;
+    }
+
+    /**
+     * Set noClassParameters to true
+     *
+     * @return void
+     */
+    public function noClassParameters() {
+        $this->noClassParameters = true;
     }
 
     /**
@@ -118,13 +134,7 @@ class CMpr
             }
         }
 
-        //$arDebug = debug_backtrace()[1] ?? debug_backtrace()[0];
-        if (isset(debug_backtrace()[1])) {
-            $arDebug = debug_backtrace()[1];
-        } else {
-            $arDebug = debug_backtrace()[0];
-        }
-
+        $arDebug = debug_backtrace()[1] ?? debug_backtrace()[0];
         $sDebug = str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug['file']) . ' [' . $arDebug['line'] . ']';
 
         $this->printAll($arData, $sDebug);
@@ -231,15 +241,18 @@ class CMpr
 
         $isObject = is_object($arData);
         if ($isObject) { //fix vars value for object to array
-            $arObject = $arData;
-            $arData = (array)$arData;
-            foreach (array_keys(get_object_vars($arObject)) as $obKey) {
-                $arData[$obKey] = $arObject->$obKey;
+            $obObject = $arData;
+            $arData = [];
+            foreach (array_keys(get_object_vars($obObject)) as $obKey) {
+                $arData[$obKey] = $obObject->$obKey;
+            }
+
+            if (!$this->noClassParameters) {
+                $this->printClassMethods($obObject);
             }
         }
 
         echo '(';
-        //array_unshift($arData, get_class_methods($arObject));
         foreach ($arData as $key => $val) {
             $this->printRow($val, $key, $isObject);
         }
@@ -247,6 +260,73 @@ class CMpr
             echo '<br>';
         }
         echo ')';
+    }
+
+    /**
+     * Print all public methods of class
+     *
+     * @param object $obObject
+     * @return void
+     */
+    private function printClassMethods($obObject) {
+        $obReflection = new ReflectionClass($obObject);
+        $arMethods = $obReflection->getMethods();
+        $arProperties = $obReflection->getProperties();
+
+        echo '<details style="position:relative;margin-left:' . $this->margin . 'px">';
+            echo '<summary style="outline:none!important;cursor:pointer;opacity:0.5;display:inline-block;position: absolute;">parameters {' . count($arMethods) . '}</summary>';
+            echo '<br>{';
+            foreach ($obReflection->getProperties() as $obProperty) {
+                $sType     = '';
+                if ($obProperty->isPrivate()) {
+                    $sType = 'private';
+                } elseif ($obProperty->isProtected()) {
+                    $sType = 'protected';
+                } elseif ($obProperty->isPublic()) {
+                    $sType = 'public';
+                }
+                $sComment  = str_replace('    ', '', $obProperty->getDocComment());
+                $sName     = $obProperty->getName();
+                $sValue    = $obReflection->getDefaultProperties()[$sName];
+                $arType    = $this->getColorByType($sValue);
+
+                echo '<div style="margin-left:' . $this->margin . 'px;margin-bottom:20px;">';
+                    echo '<div style="opacity:0.5;">' . $sComment . '</div>';
+                    echo '<div>Var [ <span style="color:#c678dd;">' . $sType . '</span> var <span style="color:#61afef;">' . $sName . '</span> = <span style="color:' . $arType['COLOR'] . '">' . $sValue . '</span> <span style="opacity:0.5">(' . $arType['TYPE'] . $arType['CHARS'] . ')</span> ]</div>';
+                echo '</div>';
+            }
+            foreach($arMethods as $sMethod) {
+                $sMethod = strip_tags($sMethod);
+                preg_match("/\/\*\*([\s\S]*?)\*\//", $sMethod, $arComment);
+                preg_match("/Method \[ ([\s\S]*?) method/", $sMethod, $arType);
+                preg_match("/@@ (.*)/", $sMethod, $arDebug);
+                preg_match("/method (.*?) ]/", $sMethod, $arName);
+                preg_match_all("/Parameter.*? \[ (.*) ]/", $sMethod, $arParameters);
+
+                $sComment     = str_replace('    ', '', $arComment[0]);
+                $sType        = trim($arType[1]);
+                $sDebug       = str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug[1]) ?? 'This is internal (built-in) PHP functions';
+                $sName        = $arName[1];
+                $arParameters = $arParameters[1];
+
+                echo '<div style="margin-left:' . $this->margin . 'px;margin-bottom:20px;">';
+                    echo '<div style="opacity:0.5;">' . $sComment . '</div>';
+                    echo '<div>Method [ <span style="color:#c678dd;">' . $sType . '</span> method <span style="color:#61afef;">' . $sName . '</span> ] {</div>';
+                    echo '<div style="margin-left:' . $this->margin . 'px;">@@ ' . $sDebug . '</div>';
+
+                    if (count($arParameters)) {
+                        echo '<br><div style="margin-left:' . $this->margin . 'px;">- Parameters [' . count($arParameters) . '] {';
+                            foreach ($arParameters as $num => $sParamater) {
+                                echo '<div style="margin-left:' . $this->margin . 'px;">Parameter #' . $num . ' [ ' . trim($sParamater) . ' ]</div>';
+                            }
+                        echo '}</div>';
+                    }
+                    echo '}';
+                echo '</div>';
+            }
+            echo '}';
+        echo '</details>';
+        echo '<div style="clear:both;"></div>';
     }
 
     /**
@@ -264,12 +344,12 @@ class CMpr
             } else {
                 $key = '[' . $key . '] => ';
             }
-            $sMargin = ' style="margin-left:' . $this->margin . 'px"';
+            $sMargin = ' style="margin-left:' . $this->margin . 'px;"';
             echo '<div>';
         }
         if (count((array)$arData) > 0) {
             echo '<details open' . $sMargin . '>';
-            echo '<summary style="outline:none!important;cursor:pointer">';
+            echo '<summary style="outline:none!important;cursor:pointer;display:inline-block;">';
         } else {
             echo '<div style="margin-left:' . $this->margin . 'px">';
         }
@@ -295,6 +375,29 @@ class CMpr
      * @return void
      */
     private function printSimpleRow($arData, $key, $isObject) {
+        $arType = $this->getColorByType($arData);
+
+        if ($key !== '') {
+            if ($isObject) {
+                echo '<div style="margin-left:' . $this->margin . 'px"><span>' . $key . '</span> : ';
+            } else {
+                echo '<div style="margin-left:' . $this->margin . 'px"><span>[' . $key . ']</span> => ';
+            }
+        }
+        echo '<span style="display:inline-table;color:' . $arType['COLOR'] . '">' . $arData . '</span> <span style="opacity:0.5">(' . $arType['TYPE'] . $arType['CHARS'] . ')</span>';
+        if ($key !== '') {
+            echo '</div>';
+        }
+    }
+
+    /**
+     * Get color by type value
+     *
+     * @param array $arData
+     * @param string $key
+     * @return void
+     */
+    private function getColorByType(&$arData) {
         $sType = gettype($arData);
         if($arData === 'NO DATA!!!') {
             $sType = 'ERROR';
@@ -306,6 +409,9 @@ class CMpr
                 $arData = str_replace(chr(13), '', $arData); //del symbol CR
                 $arData = str_replace(chr(10), '', $arData); //del symbol LF
                 $sChars = ' <small>' . iconv_strlen($arData) . '</small>';
+                if ($arData == '') {
+                    $arData =  "''";
+                }
                 break;
             case 'integer':
                 $sColor = '#98c379';
@@ -325,16 +431,13 @@ class CMpr
                 $sColor = '#e06c75';
                 break;
         }
-        if ($key !== '') {
-            if ($isObject) {
-                echo '<div style="margin-left:' . $this->margin . 'px"><span>' . $key . '</span> : ';
-            } else {
-                echo '<div style="margin-left:' . $this->margin . 'px"><span>[' . $key . ']</span> => ';
-            }
-        }
-        echo '<span style="display:inline-table;color:' . $sColor . '">' . $arData . '</span> <span style="opacity:0.5">(' . $sType . $sChars . ')</span>';
-        if ($key !== '') {
-            echo '</div>';
-        }
+
+        $return = [
+            'COLOR' => $sColor,
+            'CHARS' => $sChars,
+            'TYPE'  => $sType
+        ];
+
+        return $return;
     }
 }
