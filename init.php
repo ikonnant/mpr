@@ -11,7 +11,7 @@ CModule::AddAutoloadClasses(
 
 //function short class call
 function mpr() {
-    $mpr = new CMpr;
+    $mpr = CMpr::getInstance();
     $mpr->setArgs(func_get_args());
     //$mpr->isTest();
     //$mpr->noClear();
