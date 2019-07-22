@@ -64,6 +64,28 @@ class CMpr
      */
     private $isTest = false;
 
+    /**
+     * Color sheme
+     * 
+     * @var array
+     */
+    private $arColorSheme = [
+        'title_background' => '#DDD',
+        'title_text'       => '#000',
+        'body_background'  => '#282c34',
+        'body_text'        => '#abb2bf',
+        'array'            => '#e06c75',
+        'object'           => '#c678dd',
+        'class_method'     => '#61afef',
+        'class_var'        => '#61afef',
+        'error'            => '#e06c75',
+        'string'           => '#61afef',
+        'integer'          => '#98c379',
+        'double'           => '#98c379',
+        'boolean'          => '#d19a66',
+        'NULL'             => '#d19a66'
+    ];
+
     private function __construct() {
     }
 
@@ -120,6 +142,29 @@ class CMpr
      */
     public function setArgs($arArgs) {
         $this->arArgs = $arArgs;
+    }
+
+    /**
+     * get color sheme
+     *
+     * @return array $arColorSheme
+     */
+    public function getColorSheme() {
+        return $this->arColorSheme;
+    }
+
+    /**
+     * Set color sheme
+     *
+     * @param array $arColors
+     * @return void
+     */
+    public function setColorSheme($arColors) {
+        foreach($this->arColorSheme as $sType => $sColor) {
+            if ((string)$arColors[$sType]) {
+                $this->arColorSheme[$sType] = (string)$arColors[$sType];
+            }
+        }
     }
 
     /**
@@ -223,12 +268,12 @@ class CMpr
             return;
         }
 
-        echo '<div class="mpr" style="border:5px solid #DDD;background-color:#DDD;margin:15px auto;min-height:34px;clear:both;max-width:1000px;position:sticky;z-index:9999;">';
+        echo '<div class="mpr" style="color:' . $this->arColorSheme['title_text'] . ';border:5px solid ' . $this->arColorSheme['title_background'] . ';background-color:' . $this->arColorSheme['title_background'] . ';margin:15px auto;min-height:34px;clear:both;max-width:1000px;position:sticky;z-index:9999;">';
         if (strlen($this->sTitle) > 0) {
-            echo '<span style="padding:5px 10px 10px;float:right;opacity:0.5;font-family:monospace;word-wrap:break-word;max-width:100%;">' . $this->sTitle . '</span>';
+            echo '<span style="color:' . $this->arColorSheme['title_text'] . ';padding:5px 10px 10px;float:right;opacity:0.5;font-family:monospace;word-wrap:break-word;max-width:100%;">' . $this->sTitle . '</span>';
         }
         echo '<span style="padding:5px 10px 10px;float:left;opacity:0.5;font-family:monospace;word-wrap:break-word;max-width:100%;">' . $sDebug . '</span>';
-            echo '<pre style="line-height:1.5;background:#282c34;color:#abb2bf;border:0;border-radius:0;margin:29px 0 0;font-family:monospace;font-size:13px;font-weight:400;max-height:500px;overflow:auto;clear:both;padding:5px 8px;">';
+            echo '<pre style="line-height:1.5;background:' . $this->arColorSheme['body_background'] . ';color:' . $this->arColorSheme['body_text'] . ';border:0;border-radius:0;margin:29px 0 0;font-family:monospace;font-size:13px;font-weight:400;max-height:500px;overflow:auto;clear:both;padding:5px 8px;">';
 
                 $this->printRow($arData);
 
@@ -236,7 +281,7 @@ class CMpr
         echo '</div>';
 
         if ($this->bDie) {
-            die('<span style="margin:-20px auto 20px;clear:both;max-width:1000px;position:sticky;z-index:9999;display:block;border:5px solid #DDD;border-top:0px;background-color:#282c34;line-height:3;text-align:center;color:#e06c75;"><hr style="position:absolute;left:4%;right:55%;margin:0;top:50%;border-color:#e06c75;">DIE<hr style="position:absolute;right:4%;left:55%;margin:0;top:50%;border-color:#e06c75;"></span>');
+            die('<span style="margin:-20px auto 20px;clear:both;max-width:1000px;position:sticky;z-index:9999;display:block;border:5px solid ' . $this->arColorSheme['title_background'] . ';border-top:0px;background-color:' . $this->arColorSheme['body_background'] . ';line-height:3;text-align:center;color:' . $this->arColorSheme['error'] . ';"><hr style="position:absolute;left:4%;right:55%;margin:0;top:50%;border-color:' . $this->arColorSheme['error'] . ';">DIE<hr style="position:absolute;right:4%;left:55%;margin:0;top:50%;border-color:' . $this->arColorSheme['error'] . ';"></span>');
         }
     }
 
@@ -321,7 +366,7 @@ class CMpr
 
                 echo '<div style="margin-left:' . $this->nMargin . 'px;margin-bottom:20px;">';
                     echo '<div style="opacity:0.5;">' . $sComment . '</div>';
-                    echo '<div>Var [ <span style="color:#c678dd;">' . $sType . '</span> var <span style="color:#61afef;">' . $sName . '</span> = <span style="color:' . $arType['COLOR'] . '">' . $sValue . '</span> <span style="opacity:0.5">(' . $arType['TYPE'] . $arType['CHARS'] . ')</span> ]</div>';
+                    echo '<div>Var [ <span style="color:' . $this->arColorSheme['object'] . ';">' . $sType . '</span> var <span style="color:' . $this->arColorSheme['class_var'] . ';">' . $sName . '</span> = <span style="color:' . $arType['COLOR'] . '">' . $sValue . '</span> <span style="opacity:0.5">(' . $arType['TYPE'] . $arType['CHARS'] . ')</span> ]</div>';
                 echo '</div>';
             }
             foreach($arMethods as $sMethod) {
@@ -340,7 +385,7 @@ class CMpr
 
                 echo '<div style="margin-left:' . $this->nMargin . 'px;margin-bottom:20px;">';
                     echo '<div style="opacity:0.5;">' . $sComment . '</div>';
-                    echo '<div>Method [ <span style="color:#c678dd;">' . $sType . '</span> method <span style="color:#61afef;">' . $sName . '</span> ] {</div>';
+                    echo '<div>Method [ <span style="color:' . $this->arColorSheme['object'] . ';">' . $sType . '</span> method <span style="color:' . $this->arColorSheme['class_method'] . ';">' . $sName . '</span> ] {</div>';
                     echo '<div style="margin-left:' . $this->nMargin . 'px;">@@ ' . $sDebug . '</div>';
 
                     if (count($arParameters)) {
@@ -383,7 +428,7 @@ class CMpr
         } else {
             echo '<div style="margin-left:' . $this->nMargin . 'px">';
         }
-        echo (is_object($arData)) ? $key . '<span style="color:#c678dd;">' . get_class($arData) . ' Object {' . count((array)$arData) . '}</span>' : $key . '<span style="color:#e06c75">Array [' . count($arData) . ']</span>';
+        echo (is_object($arData)) ? $key . '<span style="color:' . $this->arColorSheme['object'] . ';">' . get_class($arData) . ' Object {' . count((array)$arData) . '}</span>' : $key . '<span style="color:' . $this->arColorSheme['array'] . '">Array [' . count($arData) . ']</span>';
 
         if (count((array)$arData) > 0) {
             echo '</summary>';
@@ -430,12 +475,12 @@ class CMpr
     private function getColorByType(&$arData) {
         $sType = gettype($arData);
         if($arData === 'NO DATA!!!') {
-            $sType = 'ERROR';
+            $sType = 'error';
         }
-        $sChars = $sColor = '';
+        $sColor = $this->arColorSheme[$sType];
+        $sChars = '';
         switch($sType) {
             case 'string':
-                $sColor = '#61afef';
                 $arData = str_replace(chr(13), '', $arData); //del symbol CR
                 $arData = str_replace(chr(10), '', $arData); //del symbol LF
                 $sChars = ' <small>' . iconv_strlen($arData) . '</small>';
@@ -444,21 +489,16 @@ class CMpr
                 }
                 break;
             case 'integer':
-                $sColor = '#98c379';
                 break;
             case 'double':
-                $sColor = '#98c379';
                 break;
             case 'boolean':
-                $sColor = '#d19a66';
                 $arData = $arData ? 'TRUE' : 'FALSE';
                 break;
             case 'NULL':
-                $sColor = '#d19a66';
                 $arData = 'NULL';
                 break;
-            case 'ERROR':
-                $sColor = '#e06c75';
+            case 'error':
                 break;
         }
 
