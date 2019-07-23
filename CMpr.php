@@ -278,10 +278,13 @@ class CMpr
                 $this->printRow($arData);
 
             echo '</pre>';
+            if ($this->bDie) {
+                echo '<span style="clear:both;max-width:1000px;position:sticky;z-index:9999;display:block;background-color:' . $this->arColorSheme['body_background'] . ';line-height:3;text-align:center;color:' . $this->arColorSheme['error'] . ';"><hr style="position:absolute;left:4%;right:55%;margin:0;top:50%;border-color:' . $this->arColorSheme['error'] . ';">DIE<hr style="position:absolute;right:4%;left:55%;margin:0;top:50%;border-color:' . $this->arColorSheme['error'] . ';"></span>';
+            }
         echo '</div>';
-
+    
         if ($this->bDie) {
-            die('<span style="margin:-20px auto 20px;clear:both;max-width:1000px;position:sticky;z-index:9999;display:block;border:5px solid ' . $this->arColorSheme['title_background'] . ';border-top:0px;background-color:' . $this->arColorSheme['body_background'] . ';line-height:3;text-align:center;color:' . $this->arColorSheme['error'] . ';"><hr style="position:absolute;left:4%;right:55%;margin:0;top:50%;border-color:' . $this->arColorSheme['error'] . ';">DIE<hr style="position:absolute;right:4%;left:55%;margin:0;top:50%;border-color:' . $this->arColorSheme['error'] . ';"></span>');
+            die();
         }
     }
 
