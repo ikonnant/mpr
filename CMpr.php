@@ -1,4 +1,5 @@
 <?php
+
 class CMpr
 {
     /**
@@ -66,7 +67,7 @@ class CMpr
 
     /**
      * Color sheme
-     * 
+     *
      * @var array
      */
     private $arColorSheme = [
@@ -83,7 +84,7 @@ class CMpr
         'integer'          => '#98c379',
         'double'           => '#98c379',
         'boolean'          => '#d19a66',
-        'NULL'             => '#d19a66'
+        'NULL'             => '#d19a66',
     ];
 
     private function __construct() {
@@ -138,6 +139,7 @@ class CMpr
      * Set arguments
      *
      * @param array $arArgs
+     *
      * @return void
      */
     public function setArgs($arArgs) {
@@ -157,10 +159,11 @@ class CMpr
      * Set color sheme
      *
      * @param array $arColors
+     *
      * @return void
      */
     public function setColorSheme($arColors) {
-        foreach($this->arColorSheme as $sType => $sColor) {
+        foreach ($this->arColorSheme as $sType => $sColor) {
             if ((string)$arColors[$sType]) {
                 $this->arColorSheme[$sType] = (string)$arColors[$sType];
             }
@@ -171,6 +174,7 @@ class CMpr
      * Set margin
      *
      * @param integer $nMargin
+     *
      * @return void
      */
     public function setMargin($nMargin) {
@@ -217,6 +221,7 @@ class CMpr
      * Set value to attribute in array and unset it into $arArgs
      *
      * @param string $sArg
+     *
      * @return boolean $bArg
      */
     private function setAttribute($sArg) {
@@ -234,6 +239,7 @@ class CMpr
      * Delete cache items into array
      *
      * @param array $arData
+     *
      * @return array $arResult
      */
     private function clearKey($arData) {
@@ -253,15 +259,16 @@ class CMpr
     /**
      * Print all result
      *
-     * @param array $arData
+     * @param array  $arData
      * @param string $sDebug
+     *
      * @return void
      */
     private function printAll($arData, $sDebug) {
-        if($this->bJS) {
+        if ($this->bJS) {
             ?><script>
                 console.log(
-                    "<?= ($this->sTitle ? $this->sTitle . ' - ' : '') . str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug['file']) . ' [' . $arDebug['line'] . ']' ?>",
+                    "<?= ($this->sTitle ? $this->sTitle . ' - ' : '') . $sDebug ?>",
                     <?= json_encode($arData) ?>
                 );
             </script><?
@@ -273,16 +280,16 @@ class CMpr
             echo '<span style="color:' . $this->arColorSheme['title_text'] . ';padding:5px 10px 10px;float:right;opacity:0.5;font-family:monospace;word-wrap:break-word;max-width:100%;">' . $this->sTitle . '</span>';
         }
         echo '<span style="padding:5px 10px 10px;float:left;opacity:0.5;font-family:monospace;word-wrap:break-word;max-width:100%;">' . $sDebug . '</span>';
-            echo '<pre style="line-height:1.5;background:' . $this->arColorSheme['body_background'] . ';color:' . $this->arColorSheme['body_text'] . ';border:0;border-radius:0;margin:29px 0 0;font-family:monospace;font-size:13px;font-weight:400;max-height:500px;overflow:auto;clear:both;padding:5px 8px;">';
+        echo '<pre style="line-height:1.5;background:' . $this->arColorSheme['body_background'] . ';color:' . $this->arColorSheme['body_text'] . ';border:0;border-radius:0;margin:29px 0 0;font-family:monospace;font-size:13px;font-weight:400;max-height:500px;overflow:auto;clear:both;padding:5px 8px;">';
 
-                $this->printRow($arData);
+        $this->printRow($arData);
 
-            echo '</pre>';
-            if ($this->bDie) {
-                echo '<span style="clear:both;max-width:1000px;position:sticky;z-index:9999;display:block;background-color:' . $this->arColorSheme['body_background'] . ';line-height:3;text-align:center;color:' . $this->arColorSheme['error'] . ';"><hr style="position:absolute;left:4%;right:55%;margin:0;top:50%;border-color:' . $this->arColorSheme['error'] . ';">DIE<hr style="position:absolute;right:4%;left:55%;margin:0;top:50%;border-color:' . $this->arColorSheme['error'] . ';"></span>';
-            }
+        echo '</pre>';
+        if ($this->bDie) {
+            echo '<span style="clear:both;max-width:1000px;position:sticky;z-index:9999;display:block;background-color:' . $this->arColorSheme['body_background'] . ';line-height:3;text-align:center;color:' . $this->arColorSheme['error'] . ';"><hr style="position:absolute;left:4%;right:55%;margin:0;top:50%;border-color:' . $this->arColorSheme['error'] . ';">DIE<hr style="position:absolute;right:4%;left:55%;margin:0;top:50%;border-color:' . $this->arColorSheme['error'] . ';"></span>';
+        }
         echo '</div>';
-    
+
         if ($this->bDie) {
             die();
         }
@@ -291,10 +298,12 @@ class CMpr
     /**
      * Print one row to result
      *
-     * @param array $arData
-     * @param string $key
+     * @param array   $arData
+     * @param string  $key
      * @param boolean $isObject
+     *
      * @return void
+     * @throws ReflectionException
      */
     private function printRow($arData, $key = '', $isObject = false) {
         if (is_object($arData) || is_array($arData)) {
@@ -308,7 +317,9 @@ class CMpr
      * Recursive print all rows
      *
      * @param array $arData
+     *
      * @return void
+     * @throws ReflectionException
      */
     private function printRowRec($arData) {
         if (!is_object($arData) && !is_array($arData)) {
@@ -319,13 +330,13 @@ class CMpr
         $isObject = is_object($arData);
         if ($isObject) { //fix vars value for object to array
             $obObject = $arData;
-            $arData = [];
-            foreach (array_keys(get_object_vars($obObject)) as $obKey) {
+            $arData   = [];
+            foreach (array_keys(get_object_vars((object)$obObject)) as $obKey) {
                 $arData[$obKey] = $obObject->$obKey;
             }
 
             if (!$this->noClassParameters) {
-                $this->printClassParameters($obObject);
+                $this->printClassParameters((object)$obObject);
             }
         }
 
@@ -343,65 +354,67 @@ class CMpr
      * Print all class parameters
      *
      * @param object $obObject
+     *
      * @return void
+     * @throws ReflectionException
      */
     private function printClassParameters($obObject) {
         $obReflection = new ReflectionClass($obObject);
-        $arMethods = $obReflection->getMethods();
+        $arMethods    = $obReflection->getMethods();
         $arProperties = $obReflection->getProperties();
 
         echo '<details style="position:relative;margin-left:' . $this->nMargin . 'px">';
-            echo '<summary style="outline:none!important;cursor:pointer;opacity:0.5;display:inline-block;position: absolute;">parameters {' . count($arMethods) . '}</summary>';
-            echo '<br>{';
-            foreach ($obReflection->getProperties() as $obProperty) {
-                $sType     = '';
-                if ($obProperty->isPrivate()) {
-                    $sType = 'private';
-                } elseif ($obProperty->isProtected()) {
-                    $sType = 'protected';
-                } elseif ($obProperty->isPublic()) {
-                    $sType = 'public';
-                }
-                $sComment  = str_replace('    ', '', $obProperty->getDocComment());
-                $sName     = $obProperty->getName();
-                $sValue    = $obReflection->getDefaultProperties()[$sName];
-                $arType    = $this->getColorByType($sValue);
-
-                echo '<div style="margin-left:' . $this->nMargin . 'px;margin-bottom:20px;">';
-                    echo '<div style="opacity:0.5;">' . $sComment . '</div>';
-                    echo '<div>Var [ <span style="color:' . $this->arColorSheme['object'] . ';">' . $sType . '</span> var <span style="color:' . $this->arColorSheme['class_var'] . ';">' . $sName . '</span> = <span style="color:' . $arType['COLOR'] . '">' . $sValue . '</span> <span style="opacity:0.5">(' . $arType['TYPE'] . $arType['CHARS'] . ')</span> ]</div>';
-                echo '</div>';
+        echo '<summary style="outline:none!important;cursor:pointer;opacity:0.5;display:inline-block;position: absolute;">parameters {' . count($arMethods) . '}</summary>';
+        echo '<br>{';
+        foreach ($arProperties as $obProperty) {
+            $sType = '';
+            if ($obProperty->isPrivate()) {
+                $sType = 'private';
+            } elseif ($obProperty->isProtected()) {
+                $sType = 'protected';
+            } elseif ($obProperty->isPublic()) {
+                $sType = 'public';
             }
-            foreach($arMethods as $sMethod) {
-                $sMethod = strip_tags($sMethod);
-                preg_match("/\/\*\*([\s\S]*?)\*\//", $sMethod, $arComment);
-                preg_match("/Method \[ ([\s\S]*?) method/", $sMethod, $arType);
-                preg_match("/@@ (.*)/", $sMethod, $arDebug);
-                preg_match("/method (.*?) ]/", $sMethod, $arName);
-                preg_match_all("/Parameter.*? \[ (.*) ]/", $sMethod, $arParameters);
+            $sComment = str_replace('    ', '', $obProperty->getDocComment());
+            $sName    = $obProperty->getName();
+            $sValue   = $obReflection->getDefaultProperties()[$sName];
+            $arType   = $this->getColorByType($sValue);
 
-                $sComment     = str_replace('    ', '', $arComment[0]);
-                $sType        = trim($arType[1]);
-                $sDebug       = str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug[1]) ?? 'This is internal (built-in) PHP functions';
-                $sName        = $arName[1];
-                $arParameters = $arParameters[1];
+            echo '<div style="margin-left:' . $this->nMargin . 'px;margin-bottom:20px;">';
+            echo '<div style="opacity:0.5;">' . $sComment . '</div>';
+            echo '<div>Var [ <span style="color:' . $this->arColorSheme['object'] . ';">' . $sType . '</span> var <span style="color:' . $this->arColorSheme['class_var'] . ';">' . $sName . '</span> = <span style="color:' . $arType['COLOR'] . '">' . $sValue . '</span> <span style="opacity:0.5">(' . $arType['TYPE'] . $arType['CHARS'] . ')</span> ]</div>';
+            echo '</div>';
+        }
+        foreach ($arMethods as $sMethod) {
+            $sMethod = strip_tags($sMethod);
+            preg_match("/\/\*\*([\s\S]*?)\*\//", $sMethod, $arComment);
+            preg_match("/Method \[ ([\s\S]*?) method/", $sMethod, $arType);
+            preg_match("/@@ (.*)/", $sMethod, $arDebug);
+            preg_match("/method (.*?) ]/", $sMethod, $arName);
+            preg_match_all("/Parameter.*? \[ (.*) ]/", $sMethod, $arParameters);
 
-                echo '<div style="margin-left:' . $this->nMargin . 'px;margin-bottom:20px;">';
-                    echo '<div style="opacity:0.5;">' . $sComment . '</div>';
-                    echo '<div>Method [ <span style="color:' . $this->arColorSheme['object'] . ';">' . $sType . '</span> method <span style="color:' . $this->arColorSheme['class_method'] . ';">' . $sName . '</span> ] {</div>';
-                    echo '<div style="margin-left:' . $this->nMargin . 'px;">@@ ' . $sDebug . '</div>';
+            $sComment     = str_replace('    ', '', $arComment[0]);
+            $sType        = trim($arType[1]);
+            $sDebug       = str_replace($_SERVER['DOCUMENT_ROOT'], '', $arDebug[1]) ?? 'This is internal (built-in) PHP functions';
+            $sName        = $arName[1];
+            $arParameters = $arParameters[1];
 
-                    if (count($arParameters)) {
-                        echo '<br><div style="margin-left:' . $this->nMargin . 'px;">- Parameters [' . count($arParameters) . '] {';
-                            foreach ($arParameters as $num => $sParamater) {
-                                echo '<div style="margin-left:' . $this->nMargin . 'px;">Parameter #' . $num . ' [ ' . trim($sParamater) . ' ]</div>';
-                            }
-                        echo '}</div>';
-                    }
-                    echo '}';
-                echo '</div>';
+            echo '<div style="margin-left:' . $this->nMargin . 'px;margin-bottom:20px;">';
+            echo '<div style="opacity:0.5;">' . $sComment . '</div>';
+            echo '<div>Method [ <span style="color:' . $this->arColorSheme['object'] . ';">' . $sType . '</span> method <span style="color:' . $this->arColorSheme['class_method'] . ';">' . $sName . '</span> ] {</div>';
+            echo '<div style="margin-left:' . $this->nMargin . 'px;">@@ ' . $sDebug . '</div>';
+
+            if (count($arParameters)) {
+                echo '<br><div style="margin-left:' . $this->nMargin . 'px;">- Parameters [' . count($arParameters) . '] {';
+                foreach ($arParameters as $num => $sParamater) {
+                    echo '<div style="margin-left:' . $this->nMargin . 'px;">Parameter #' . $num . ' [ ' . trim($sParamater) . ' ]</div>';
+                }
+                echo '}</div>';
             }
             echo '}';
+            echo '</div>';
+        }
+        echo '}';
         echo '</details>';
         echo '<div style="clear:both;"></div>';
     }
@@ -409,10 +422,12 @@ class CMpr
     /**
      * Print array and object
      *
-     * @param array $arData
-     * @param string $key
+     * @param array   $arData
+     * @param string  $key
      * @param boolean $isObject
+     *
      * @return void
+     * @throws ReflectionException
      */
     private function printArrayRow($arData, $key, $isObject) {
         $sMargin = '';
@@ -448,9 +463,10 @@ class CMpr
     /**
      * Print simple item
      *
-     * @param array $arData
-     * @param string $key
+     * @param array   $arData
+     * @param string  $key
      * @param boolean $isObject
+     *
      * @return void
      */
     private function printSimpleRow($arData, $key, $isObject) {
@@ -473,27 +489,24 @@ class CMpr
      * Get color by type value
      *
      * @param array $arData
+     *
      * @return array $arResult
      */
     private function getColorByType(&$arData) {
         $sType = gettype($arData);
-        if($arData === 'NO DATA!!!') {
+        if ($arData === 'NO DATA!!!') {
             $sType = 'error';
         }
         $sColor = $this->arColorSheme[$sType];
         $sChars = '';
-        switch($sType) {
+        switch ($sType) {
             case 'string':
                 $arData = str_replace(chr(13), '', $arData); //del symbol CR
                 $arData = str_replace(chr(10), '', $arData); //del symbol LF
                 $sChars = ' <small>' . iconv_strlen($arData) . '</small>';
                 if ($arData == '') {
-                    $arData =  "''";
+                    $arData = "''";
                 }
-                break;
-            case 'integer':
-                break;
-            case 'double':
                 break;
             case 'boolean':
                 $arData = $arData ? 'TRUE' : 'FALSE';
@@ -501,6 +514,8 @@ class CMpr
             case 'NULL':
                 $arData = 'NULL';
                 break;
+            case 'double':
+            case 'integer':
             case 'error':
                 break;
         }
@@ -508,7 +523,7 @@ class CMpr
         $arResult = [
             'COLOR' => $sColor,
             'CHARS' => $sChars,
-            'TYPE'  => $sType
+            'TYPE'  => $sType,
         ];
 
         return $arResult;
