@@ -190,7 +190,6 @@ class CMpr
      * @throws ReflectionException
      */
     public function init() {
-
         if ($this->isTest && !isset($_GET['test'])) {
             return;
         }
@@ -448,7 +447,12 @@ class CMpr
         } else {
             echo '<div style="margin-left:' . $this->nMargin . 'px">';
         }
-        echo (is_object($arData)) ? $key . '<span style="color:' . $this->arColorSheme['object'] . ';">' . get_class($arData) . ' Object {' . count((array)$arData) . '}</span>' : $key . '<span style="color:' . $this->arColorSheme['array'] . '">Array [' . count($arData) . ']</span>';
+
+        if (is_object($arData)) {
+            echo $key . '<span style="color:' . $this->arColorSheme['object'] . ';">' . get_class($arData) . ' Object {' . count((array)$arData) . '}</span>';
+        } else {
+            echo $key . '<span style="color:' . $this->arColorSheme['array'] . '">Array [' . count($arData) . ']</span>';
+        }
 
         if (count((array)$arData) > 0) {
             echo '</summary>';
@@ -519,6 +523,7 @@ class CMpr
             case 'double':
             case 'integer':
             case 'error':
+            default:
                 break;
         }
 
