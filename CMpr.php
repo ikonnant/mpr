@@ -187,6 +187,7 @@ class CMpr
      * Basic function
      *
      * @return void
+     * @throws ReflectionException
      */
     public function init() {
 
@@ -263,6 +264,7 @@ class CMpr
      * @param string $sDebug
      *
      * @return void
+     * @throws ReflectionException
      */
     private function printAll($arData, $sDebug) {
         if ($this->bJS) {
