@@ -364,8 +364,12 @@ class CMpr
         $arMethods    = $obReflection->getMethods();
         $arProperties = $obReflection->getProperties();
 
+        if (count($arMethods) == 0) {
+            echo '<div style="outline:none!important;opacity:0.5;display:inline-block;position:absolute;left:28px;">parameters {' . count($arMethods) . '}</div>';
+            return;
+        }
         echo '<details style="position:relative;margin-left:' . $this->nMargin . 'px">';
-        echo '<summary style="outline:none!important;cursor:pointer;opacity:0.5;display:inline-block;position: absolute;">parameters {' . count($arMethods) . '}</summary>';
+        echo '<summary style="outline:none!important;cursor:pointer;opacity:0.5;display:inline-block;position:absolute;">parameters {' . count($arMethods) . '}</summary>';
         echo '<br>{';
         foreach ($arProperties as $obProperty) {
             $sType = '';
