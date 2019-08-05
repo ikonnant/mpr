@@ -149,10 +149,16 @@ class CMpr
     /**
      * get color sheme
      *
+     * @param string $sType
+     *
      * @return array $arColorSheme
      */
-    public function getColorSheme() {
-        return $this->arColorSheme;
+    public function getColorSheme($sType = '') {
+        if (array_key_exists($sType, $this->arColorSheme)) {
+            return [$sType => $this->arColorSheme[$sType]];
+        } else {
+            return $this->arColorSheme;
+        }
     }
 
     /**
@@ -160,14 +166,16 @@ class CMpr
      *
      * @param array $arColors
      *
-     * @return void
+     * @return bool
      */
     public function setColorSheme($arColors) {
         foreach ($this->arColorSheme as $sType => $sColor) {
             if ((string)$arColors[$sType]) {
                 $this->arColorSheme[$sType] = (string)$arColors[$sType];
+                return true;
             }
         }
+        return false;
     }
 
     /**
@@ -231,7 +239,6 @@ class CMpr
             $bArg = (boolean)$this->arArgs[$nArg];
             unset($this->arArgs[$nArg]);
         }
-
         return $bArg;
     }
 
@@ -536,7 +543,6 @@ class CMpr
             'CHARS' => $sChars,
             'TYPE'  => $sType,
         ];
-
         return $arResult;
     }
 }
