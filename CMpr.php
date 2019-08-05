@@ -187,7 +187,7 @@ class CMpr
      */
     public function setMargin($nMargin) {
         if ((integer)$nMargin > 0) {
-            $this->nMargin = $nMargin;
+            $this->nMargin = (integer)$nMargin;
         }
     }
 
