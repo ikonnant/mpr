@@ -56,7 +56,7 @@ class CMpr
      *
      * @var boolean
      */
-    private $noClassParameters = false;
+    private $noClassParameters = true;
 
     /**
      * Test
@@ -99,11 +99,16 @@ class CMpr
     /**
      * Void singleton object
      *
+     * @param array $arArgs
+     *
      * @return object self::$instance
      */
-    public static function getInstance() {
+    public static function getInstance($arArgs = []) {
         if (is_null(self::$instance)) {
             self::$instance = new self;
+        }
+        if ($arArgs) {
+            self::$instance->setArgs($arArgs);
         }
         return self::$instance;
     }
@@ -111,28 +116,34 @@ class CMpr
     /**
      * Set noClear to true
      *
-     * @return void
+     * @return object
      */
     public function noClear() {
         $this->noClear = true;
+
+        return self::$instance;
     }
 
     /**
      * Set noClassParameters to true
      *
-     * @return void
+     * @return object
      */
-    public function noClassParameters() {
-        $this->noClassParameters = true;
+    public function showClassParameters() {
+        $this->noClassParameters = false;
+
+        return self::$instance;
     }
 
     /**
      * Set isTest to true
      *
-     * @return void
+     * @return object
      */
     public function isTest() {
         $this->isTest = true;
+
+        return self::$instance;
     }
 
     /**
@@ -140,10 +151,12 @@ class CMpr
      *
      * @param array $arArgs
      *
-     * @return void
+     * @return object
      */
     public function setArgs($arArgs) {
         $this->arArgs = $arArgs;
+
+        return self::$instance;
     }
 
     /**
@@ -166,16 +179,16 @@ class CMpr
      *
      * @param array $arColors
      *
-     * @return bool
+     * @return object
      */
     public function setColorSheme($arColors) {
         foreach ($this->arColorSheme as $sType => $sColor) {
             if ((string)$arColors[$sType]) {
                 $this->arColorSheme[$sType] = (string)$arColors[$sType];
-                return true;
             }
         }
-        return false;
+
+        return self::$instance;
     }
 
     /**
@@ -183,12 +196,14 @@ class CMpr
      *
      * @param integer $nMargin
      *
-     * @return void
+     * @return object
      */
     public function setMargin($nMargin) {
         if ((integer)$nMargin > 0) {
             $this->nMargin = (integer)$nMargin;
         }
+
+        return self::$instance;
     }
 
     /**
