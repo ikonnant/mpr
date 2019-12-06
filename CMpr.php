@@ -553,11 +553,10 @@ class CMpr
                 break;
         }
 
-        $arResult = [
+        return [
             'COLOR' => $sColor,
             'CHARS' => $sChars,
             'TYPE'  => $sType,
         ];
-        return $arResult;
     }
 }
